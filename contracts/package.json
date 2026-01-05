@@ -12,7 +12,7 @@
     "test": "npx hardhat test",
     "test:nodejs": "npx hardhat test nodejs",
     "test:solidity": "npx hardhat test solidity",
-    "deploy": "npx hardhat ignition deploy ignition/modules/Counter.ts --network localhost"
+    "deploy": "npx hardhat ignition deploy ignition/modules/SimpleToken.ts --network localhost"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^4.0.3",
