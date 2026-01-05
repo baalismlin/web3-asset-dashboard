@@ -35,6 +35,24 @@ contract SimpleTokenTest is Test {
         assertEq(1000, token.totalSupply());
     }
 
+    function test_MintEmitsEvent() public {
+        vm.prank(owner);
+
+        vm.expectEmit(true, false, false, true);
+        emit SimpleToken.Minted(owner, 100);
+
+        token.mint(100);
+    }
+
+    function testFuzz_MintIncreasesBalance(uint8 x) public {
+        vm.assume(x > 0);
+
+        vm.prank(owner);
+        token.mint(uint256(x) * 100);
+
+        assertEq(token.balanceOf(owner), uint256(x) * 100);
+    }
+
     function test_ApproveSetsAllowance() public {
         vm.prank(owner);
         token.mint(1000);
@@ -81,7 +99,65 @@ contract SimpleTokenTest is Test {
         assertEq(200, token.allowance(owner, spender2));
     }
 
-    function test_BalanceOf() public {}
+    function test_TransferBalance() public {
+        vm.prank(owner);
+        token.mint(1000);
+
+        vm.prank(owner);
+        token.transfer(spender, 300);
+
+        assertEq(300, token.balanceOf(spender));
+        assertEq(700, token.balanceOf(owner));
+    }
+
+    function test_TransferEmitsEvent() public {
+        vm.prank(owner);
+        token.mint(1000);
+
+        vm.prank(owner);
+        vm.expectEmit(true, true, false, true);
+        emit IERC20.Transfer(owner, spender, 300);
+
+        token.transfer(spender, 300);
+    }
+
+    function test_TransferFrom() public {
+        vm.prank(owner);
+        token.mint(1000);
+
+        vm.prank(owner);
+        token.approve(spender, 100);
+
+        vm.prank(spender);
+        token.transferFrom(owner, spender2, 100);
+
+        assertEq(100, token.balanceOf(spender2));
+        assertEq(900, token.balanceOf(owner));
+        assertEq(0, token.allowance(owner, spender));
+    }
+
+    function test_TransferFromNotEnoughAllowance() public {
+        vm.prank(owner);
+        token.mint(1000);
+
+        vm.prank(owner);
+        token.approve(spender, 100);
+
+        vm.prank(spender);
+        vm.expectRevert();
+
+        token.transferFrom(owner, spender2, 200);
+    }
+
+    function test_TransferNotEnoughMoney() public {
+        vm.prank(owner);
+        token.mint(100);
+
+        vm.prank(owner);
+        vm.expectRevert();
+
+        token.transfer(spender, 300);
+    }
 
     function test_MintWithoutOwner() public {
         vm.prank(attacker);

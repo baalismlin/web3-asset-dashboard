@@ -11,6 +11,8 @@ contract SimpleToken is IERC20, IERC20Metadata {
     mapping(address => uint256) private _balance;
     mapping(address => mapping(address => uint256)) private _allowance;
 
+    event Minted(address indexed to, uint256 amount);
+
     constructor() {
         _owner = msg.sender;
         _totalSupply = 0;
@@ -92,6 +94,6 @@ contract SimpleToken is IERC20, IERC20Metadata {
         _totalSupply += value;
         _balance[msg.sender] += value;
 
-        emit Transfer(address(0), msg.sender, value);
+        emit Minted(msg.sender, value);
     }
 }
